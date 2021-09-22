@@ -117,7 +117,7 @@ void HelloWorld::onMouseDown(Event* event)
 {
     // to illustrate the event....
     EventMouse* e = (EventMouse*)event;
-    character->onMouseDown(e);
+    character->addAction(new Walk(1, cocos2d::Vec2(e->getCursorX(), e->getCursorY())));
 }
 
 void HelloWorld::onSceneReady()
@@ -128,6 +128,7 @@ void HelloWorld::onSceneReady()
 void HelloWorld::update(float delta)
 {
     Scene::update(delta);
+    character->update(delta);
 }
 
 
