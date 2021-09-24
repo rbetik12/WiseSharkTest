@@ -42,88 +42,72 @@ static void problemLoading(const char* filename)
         "Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-// on "init" you need to initialize your instance
+static ui::Button* createButton()
+{
+    auto button = ui::Button::create(
+        "button.png",
+        "button_clicked.png");
+    button->ignoreContentAdaptWithSize(false);
+    button->setContentSize(Size(200, 100));
+    button->setTitleFontSize(35);
+    if (button == nullptr ||
+        button->getContentSize().width <= 0 ||
+        button->getContentSize().height <= 0)
+    {
+        problemLoading("'button.png' and 'button_clicked.png'");
+        return nullptr;
+    }
+
+    return button;
+}
+
 bool HelloWorld::init()
 {
-    //////////////////////////////
-    // 1. super init first
     if (!Scene::init())
     {
         return false;
     }
 
-
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
-
-    auto stopButton = ui::Button::create(
-        "button.png",
-        "button_clicked.png");
-    // add a "close" icon to exit the progress. it's an autorelease object
-    stopButton->setTitleText("Stop");
-    stopButton->setTitleFontSize(30);
-    if (stopButton == nullptr ||
-        stopButton->getContentSize().width <= 0 ||
-        stopButton->getContentSize().height <= 0)
-    {
-        problemLoading("'CloseNormal.png' and 'CloseSelected.png'");
-    }
-    else
-    {
-        float x = origin.x + visibleSize.width - stopButton->getContentSize().width / 2;
-        float y = origin.y + stopButton->getContentSize().height / 2;
-        // stopButton->setPosition(Vec2(x, y));
-    }
-
-    stopButton->addClickEventListener([&](Ref* sender)
-    {
-        character->addAction(new Idle());
-    });
-
-    // create menu, it's an autorelease object
-    // auto menu = Menu::create(stopButton, NULL);
-    // menu->setPosition(Vec2::ZERO);
-    // this->addChild(menu, 1);
-
-    /////////////////////////////
-    // 3. add your codes below...
-
-    // add a label shows "Hello World"
-    // create and initialize a label
-
-    auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 24);
-    if (label == nullptr)
-    {
-        problemLoading("'fonts/Marker Felt.ttf'");
-    }
-    else
-    {
-        // position the label on the center of the screen
-        label->setPosition(Vec2(origin.x + visibleSize.width / 2,
-                                origin.y + visibleSize.height - label->getContentSize().height));
-
-        // add the label as a child to this layer
-        this->addChild(label, 1);
-    }
-
+    this->setOnEnterCallback(CC_CALLBACK_0(HelloWorld::onSceneReady, this));
     auto mouseListener = EventListenerMouse::create();
     mouseListener->onMouseDown = CC_CALLBACK_1(HelloWorld::onMouseDown, this);
-
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
-    this->setOnEnterCallback(CC_CALLBACK_0(HelloWorld::onSceneReady, this));
-    
-    mainUiLayout = cocos2d::ui::Layout::create();
+
+    auto stopButton = createButton();
+    if (!stopButton)
+    {
+        return false;
+    }
+
+    stopButton->setTitleText("Stop");
+    stopButton->addClickEventListener([&](Ref* sender)
+        {
+            character->addAction(new Idle());
+        }
+    );
+
+    auto attackButton = createButton();
+    if (!attackButton)
+    {
+        return false;
+    }
+
+    attackButton->setTitleText("Attack");
+    attackButton->addClickEventListener([&](Ref* sender)
+        {
+            character->addAction(new Attack());
+        }
+    );
+
+    mainUiLayout = ui::Layout::create();
     mainUiLayout->setLayoutType(ui::Layout::Type::HORIZONTAL);
     mainUiLayout->setTouchEnabled(true);
     mainUiLayout->setSwallowTouches(true);
-    mainUiLayout->setPosition(Vec2(200, 200));
+    mainUiLayout->setPosition(Vec2(0, 0));
     mainUiLayout->addChild(stopButton);
-    mainUiLayout->setContentSize(stopButton->getContentSize());
+    mainUiLayout->addChild(attackButton);
+    mainUiLayout->setContentSize(Size(stopButton->getContentSize().width + attackButton->getContentSize().width, stopButton->getContentSize().height));
 
     this->addChild(mainUiLayout, 100);
 
