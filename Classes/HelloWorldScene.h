@@ -27,6 +27,7 @@
 
 #include "cocos2d.h"
 #include "Character/Character.h"
+#include "ui/UILayout.h"
 
 class HelloWorld : public cocos2d::Scene
 {
@@ -37,18 +38,19 @@ public:
 
     virtual void update(float delta) override;
 
-    void onMouseDown(cocos2d::Event *event);
-    
+    void onMouseDown(cocos2d::Event* event);
+
     // a selector callback
-    void menuCloseCallback(cocos2d::Ref* pSender);
+    void stopButtonCallback(cocos2d::Ref* pSender);
 
     void onSceneReady();
-    
+
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
 private:
     Character* character = nullptr;
+    cocos2d::ui::Layout* mainUiLayout = nullptr;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

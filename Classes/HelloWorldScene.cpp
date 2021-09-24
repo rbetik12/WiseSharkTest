@@ -24,6 +24,8 @@
 
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
+#include "ui/UIButton.h"
+#include "ui/UILayout.h"
 
 USING_NS_CC;
 
@@ -50,6 +52,7 @@ bool HelloWorld::init()
         return false;
     }
 
+
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -57,29 +60,34 @@ bool HelloWorld::init()
     // 2. add a menu item with "X" image, which is clicked to quit the program
     //    you may modify it.
 
+    auto stopButton = ui::Button::create(
+        "button.png",
+        "button_clicked.png");
     // add a "close" icon to exit the progress. it's an autorelease object
-    auto closeItem = MenuItemImage::create(
-        "CloseNormal.png",
-        "CloseSelected.png",
-        CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
-
-    if (closeItem == nullptr ||
-        closeItem->getContentSize().width <= 0 ||
-        closeItem->getContentSize().height <= 0)
+    stopButton->setTitleText("Stop");
+    stopButton->setTitleFontSize(30);
+    if (stopButton == nullptr ||
+        stopButton->getContentSize().width <= 0 ||
+        stopButton->getContentSize().height <= 0)
     {
         problemLoading("'CloseNormal.png' and 'CloseSelected.png'");
     }
     else
     {
-        float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
-        float y = origin.y + closeItem->getContentSize().height / 2;
-        closeItem->setPosition(Vec2(x, y));
+        float x = origin.x + visibleSize.width - stopButton->getContentSize().width / 2;
+        float y = origin.y + stopButton->getContentSize().height / 2;
+        // stopButton->setPosition(Vec2(x, y));
     }
 
+    stopButton->addClickEventListener([&](Ref* sender)
+    {
+        character->addAction(new Idle());
+    });
+
     // create menu, it's an autorelease object
-    auto menu = Menu::create(closeItem, NULL);
-    menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);
+    // auto menu = Menu::create(stopButton, NULL);
+    // menu->setPosition(Vec2::ZERO);
+    // this->addChild(menu, 1);
 
     /////////////////////////////
     // 3. add your codes below...
@@ -108,6 +116,16 @@ bool HelloWorld::init()
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
     this->setOnEnterCallback(CC_CALLBACK_0(HelloWorld::onSceneReady, this));
+    
+    mainUiLayout = cocos2d::ui::Layout::create();
+    mainUiLayout->setLayoutType(ui::Layout::Type::HORIZONTAL);
+    mainUiLayout->setTouchEnabled(true);
+    mainUiLayout->setSwallowTouches(true);
+    mainUiLayout->setPosition(Vec2(200, 200));
+    mainUiLayout->addChild(stopButton);
+    mainUiLayout->setContentSize(stopButton->getContentSize());
+
+    this->addChild(mainUiLayout, 100);
 
     this->scheduleUpdate();
     return true;
@@ -117,6 +135,12 @@ void HelloWorld::onMouseDown(Event* event)
 {
     // to illustrate the event....
     EventMouse* e = (EventMouse*)event;
+    Vec2 clickLocation = Vec2(e->getCursorX(), e->getCursorY());
+    Rect box = mainUiLayout->getBoundingBox();
+    if (box.containsPoint(clickLocation))
+    {
+        return;
+    }
     character->addAction(new Walk(1, cocos2d::Vec2(e->getCursorX(), e->getCursorY())));
 }
 
@@ -132,13 +156,7 @@ void HelloWorld::update(float delta)
 }
 
 
-void HelloWorld::menuCloseCallback(Ref* pSender)
+void HelloWorld::stopButtonCallback(Ref* pSender)
 {
-    //Close the cocos2d-x game scene and quit the application
-    Director::getInstance()->end();
-
-    /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() as given above,instead trigger a custom event created in RootViewController.mm as below*/
-
-    //EventCustom customEndEvent("game_scene_close_event");
-    //_eventDispatcher->dispatchEvent(&customEndEvent);
+    character->addAction(new Idle());
 }

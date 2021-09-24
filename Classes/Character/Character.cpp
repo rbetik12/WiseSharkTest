@@ -20,6 +20,11 @@ void Character::update(float delta)
                   {
                       if (action)
                       {
+                          if (action->actionDescription == CharacterActionDescription::Idle)
+                          {
+                              sprite->stopAllActions();
+                              return State{Idle{}};
+                          }
                           if (action->actionDescription == CharacterActionDescription::Walk)
                           {
                               auto walkAction = static_cast<Walk*>(action);
