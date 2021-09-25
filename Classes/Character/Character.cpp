@@ -23,10 +23,10 @@ void Character::update(float delta)
     state = match(state,
                   [&](Idle& state) -> State
                   {
-                      auto animationName = skeletonNode->getState()->tracks[0]->animation->name;
+                      auto animationName = characterSpine->getState()->tracks[0]->animation->name;
                       if (strcmp(animationName, "idle"))
                       {
-                          skeletonNode->setAnimation(0, "idle", true);
+                          characterSpine->setAnimation(0, "idle", true);
                       }
 
                       moveSpeed = initMoveSpeed;
@@ -36,13 +36,13 @@ void Character::update(float delta)
 
                   [&](Walk& state) -> State
                   {
-                      auto animationName = skeletonNode->getState()->tracks[0]->animation->name;
+                      auto animationName = characterSpine->getState()->tracks[0]->animation->name;
                       if (strcmp(animationName, "move"))
                       {
-                          skeletonNode->setAnimation(0, "move", true);
+                          characterSpine->setAnimation(0, "move", true);
                       }
 
-                      cocos2d::Vec2 currentPosition = skeletonNode->getPosition();
+                      cocos2d::Vec2 currentPosition = characterSpine->getPosition();
                       float distance = state.destination.distance(currentPosition);
 
                       if (distance <= 10.0f)
@@ -58,7 +58,7 @@ void Character::update(float delta)
                           return State{Idle{}};
                       }
 
-                      cocos2d::Vec2 direction = state.destination - skeletonNode->getPosition();
+                      cocos2d::Vec2 direction = state.destination - characterSpine->getPosition();
                       direction.normalize();
 
                       cocos2d::Vec2 orig(1, 0);
@@ -68,29 +68,29 @@ void Character::update(float delta)
 
                       if (cos >= 0)
                       {
-                          skeletonNode->setScaleX(-1);
+                          characterSpine->setScaleX(-1);
                       }
                       else
                       {
-                          skeletonNode->setScaleX(1);
+                          characterSpine->setScaleX(1);
                       }
 
                       cocos2d::Vec2 newPosition = direction * delta * moveSpeed + currentPosition;
 
-                      skeletonNode->setPosition(newPosition);
+                      characterSpine->setPosition(newPosition);
 
                       return State{state};
                   },
 
                   [&](Attack& state) -> State
                   {
-                      auto animationName = skeletonNode->getState()->tracks[0]->animation->name;
+                      auto animationName = characterSpine->getState()->tracks[0]->animation->name;
                       if (strcmp(animationName, "attack"))
                       {
-                          auto animation = skeletonNode->setAnimation(0, "attack", false);
+                          auto animation = characterSpine->setAnimation(0, "attack", false);
                           animation->listener = &animListener;
                       }
-                      else if (strcmp(animationName, "attack") == 0 && skeletonNode->getState()->tracks[0]->animationStart == -1)
+                      else if (strcmp(animationName, "attack") == 0 && characterSpine->getState()->tracks[0]->animationStart == -1)
                       {
                           return State{Idle{}};
                       }
@@ -115,12 +115,12 @@ void Character::initialize()
 
     state = State{Idle{}};
 
-    skeletonNode = spine::SkeletonAnimation::createWithJsonFile("hero_2.json", "hero_2.atlas", 2.0f);
-    skeletonNode->setAnimation(0, "idle", true);
-    skeletonNode->setPosition(cocos2d::Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-    skeletonNode->setMix("idle", "move", 0.1);
-    skeletonNode->setMix("move", "idle", 0.1);
-    activeScene->addChild(skeletonNode);
+    characterSpine = spine::SkeletonAnimation::createWithJsonFile("hero_2.json", "hero_2.atlas", 2.0f);
+    characterSpine->setAnimation(0, "idle", true);
+    characterSpine->setPosition(cocos2d::Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+    characterSpine->setMix("idle", "move", 0.1);
+    characterSpine->setMix("move", "idle", 0.1);
+    activeScene->addChild(characterSpine);
 }
 
 void Character::checkActionQueue()

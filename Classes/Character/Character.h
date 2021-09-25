@@ -57,7 +57,7 @@ private:
     cocos2d::Action* spriteMoveToAction = nullptr;
     State state;
     std::deque<CharacterAction*> actions;
-    spine::SkeletonAnimation *skeletonNode = nullptr;
+    spine::SkeletonAnimation *characterSpine = nullptr;
     
     const float initMoveSpeed = 500.0f;
     float moveSpeed = initMoveSpeed;
