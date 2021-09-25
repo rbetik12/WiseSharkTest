@@ -52,7 +52,7 @@ public:
     void addAction(CharacterAction* action);
 private:
     void initialize();
-    CharacterAction* checkActionQueue();
+    void checkActionQueue();
     
     cocos2d::Action* spriteMoveToAction = nullptr;
     State state;

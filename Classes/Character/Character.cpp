@@ -9,8 +9,7 @@ Character::Character()
 
 void Character::update(float delta)
 {
-    CharacterAction* action = nullptr;
-    
+    checkActionQueue();
     state = match(state,
                   [&](Idle& state) -> State
                   {
@@ -38,8 +37,6 @@ void Character::update(float delta)
                       return State{Idle{}};
                   }
     );
-
-    delete action;
 }
 
 void Character::addAction(CharacterAction* action)
@@ -65,7 +62,7 @@ void Character::initialize()
     activeScene->addChild(skeletonNode);
 }
 
-CharacterAction* Character::checkActionQueue()
+void Character::checkActionQueue()
 {
     CharacterAction* action = nullptr;
     
@@ -92,6 +89,4 @@ CharacterAction* Character::checkActionQueue()
             }
         }
     }
-
-    return action;
 }
