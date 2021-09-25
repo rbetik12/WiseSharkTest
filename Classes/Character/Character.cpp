@@ -1,5 +1,7 @@
 #include "Character.h"
 
+#include <iostream>
+
 #include "Match.h"
 
 Character::Character()
@@ -45,8 +47,12 @@ void Character::update(float delta)
 
                       if (distance <= 10.0f)
                       {
-                          moveSpeed /= 2;
+                          if (moveSpeed >= 10.0f)
+                          {
+                              moveSpeed /= 2;
+                          }
                       }
+                      
                       if (distance <= 1.0f)
                       {
                           return State{Idle{}};
