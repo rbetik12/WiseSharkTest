@@ -2,6 +2,8 @@
 #include "cocos2d.h"
 #include <variant>
 
+#include "spine/SkeletonAnimation.h"
+
 enum class CharacterActionDescription
 {
     Idle,
@@ -50,9 +52,9 @@ public:
     void addAction(CharacterAction* action);
 private:
     void initialize();
-
-    cocos2d::Sprite* sprite = nullptr;
+    
     cocos2d::Action* spriteMoveToAction = nullptr;
     State state;
     std::deque<CharacterAction*> actions;
+    spine::SkeletonAnimation *skeletonNode = nullptr;
 };

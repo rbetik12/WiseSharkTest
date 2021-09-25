@@ -18,11 +18,16 @@ void Character::update(float delta)
     state = match(state,
                   [&](Idle& state) -> State
                   {
+                      auto animationName = skeletonNode->getState()->tracks[0]->animation->name;
+                      if (strcmp(animationName, "idle"))
+                      {
+                          skeletonNode->setAnimation(0, "idle", true);
+                      }
                       if (action)
                       {
                           if (action->actionDescription == CharacterActionDescription::Idle)
                           {
-                              sprite->stopAllActions();
+                              skeletonNode->stopAllActions();
                               return State{Idle{}};
                           }
                           if (action->actionDescription == CharacterActionDescription::Walk)
@@ -46,10 +51,11 @@ void Character::update(float delta)
 
                       if (spriteMoveToAction)
                       {
-                          sprite->stopAction(spriteMoveToAction);
+                          skeletonNode->stopAction(spriteMoveToAction);
                       }
 
-                      spriteMoveToAction = sprite->runAction(moveTo);
+                      spriteMoveToAction = skeletonNode->runAction(moveTo);
+                      // skeletonNode->setAnimation(2, "walk", true);
                       return State{Idle{}};
                   },
 
@@ -67,29 +73,18 @@ void Character::addAction(CharacterAction* action)
     actions.push_back(action);
 }
 
-// void Character::onMouseDown(cocos2d::EventMouse* mouse)
-// {
-//     cocos2d::MoveTo* moveTo = cocos2d::MoveTo::create(1, cocos2d::Vec2(mouse->getCursorX(), mouse->getCursorY()));
-//
-//     if (moveToAction)
-//     {
-//         sprite->stopAction(moveToAction);
-//     }
-//
-//     moveToAction = sprite->runAction(moveTo);
-// }
-
 void Character::initialize()
 {
     auto director = cocos2d::Director::getInstance();
     auto visibleSize = director->getVisibleSize();
     cocos2d::Vec2 origin = director->getVisibleOrigin();
 
-    sprite = cocos2d::Sprite::create("HelloWorld.png");
-    sprite->setPosition(cocos2d::Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-
     auto activeScene = director->getRunningScene();
-    activeScene->addChild(sprite);
 
     state = State{Idle{}};
+
+    skeletonNode = spine::SkeletonAnimation::createWithJsonFile("hero_2.json", "hero_2.atlas", 2.0f);
+    skeletonNode->setAnimation(0, "idle", true);
+    skeletonNode->setPosition(cocos2d::Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+    activeScene->addChild(skeletonNode);
 }
