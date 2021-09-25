@@ -58,4 +58,7 @@ private:
     State state;
     std::deque<CharacterAction*> actions;
     spine::SkeletonAnimation *skeletonNode = nullptr;
+    
+    const float initMoveSpeed = 500.0f;
+    float moveSpeed = initMoveSpeed;
 };

@@ -18,7 +18,9 @@ void Character::update(float delta)
                       {
                           skeletonNode->setAnimation(0, "idle", true);
                       }
-                      
+
+                      moveSpeed = initMoveSpeed;
+
                       return State{Idle{}};
                   },
 
@@ -29,6 +31,39 @@ void Character::update(float delta)
                       {
                           skeletonNode->setAnimation(0, "move", true);
                       }
+
+                      cocos2d::Vec2 currentPosition = skeletonNode->getPosition();
+                      float distance = state.destination.distance(currentPosition);
+                      
+                      if (distance <= 10.0f)
+                      {
+                        moveSpeed /= 2;    
+                      }
+                      if (distance <= 1.0f)
+                      {
+                          return State{Idle{}};
+                      }
+
+                      cocos2d::Vec2 direction = state.destination - skeletonNode->getPosition();
+                      direction.normalize();
+
+                      cocos2d::Vec2 orig(1, 0);
+                      orig.normalize();
+                      float cos = ((direction.x * orig.x) + (direction.y * orig.y)) / (direction.length() * orig.length());
+
+                      if (cos >= 0)
+                      {
+                          skeletonNode->setScaleX(-1);
+                      }
+                      else
+                      {
+                          skeletonNode->setScaleX(1);
+                      }
+
+                      cocos2d::Vec2 newPosition = direction * delta * moveSpeed + currentPosition;
+
+                      skeletonNode->setPosition(newPosition);
+
                       return State{state};
                   },
 
@@ -65,7 +100,7 @@ void Character::initialize()
 void Character::checkActionQueue()
 {
     CharacterAction* action = nullptr;
-    
+
     if (!actions.empty())
     {
         action = actions.front();
@@ -80,6 +115,7 @@ void Character::checkActionQueue()
             if (action->actionDescription == CharacterActionDescription::Walk)
             {
                 auto walkAction = static_cast<Walk*>(action);
+                moveSpeed = initMoveSpeed;
                 state = State{Walk{walkAction->time, walkAction->destination}};
             }
             if (action->actionDescription == CharacterActionDescription::Attack)
