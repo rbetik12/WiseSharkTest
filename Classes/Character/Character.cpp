@@ -7,6 +7,14 @@ Character::Character()
     initialize();
 }
 
+static void animListener(spAnimationState* state, spEventType type, spTrackEntry* entry, spEvent* event)
+{
+    if (type == SP_ANIMATION_COMPLETE)
+    {
+        entry->animationStart = -1;
+    }
+}
+
 void Character::update(float delta)
 {
     checkActionQueue();
@@ -34,10 +42,10 @@ void Character::update(float delta)
 
                       cocos2d::Vec2 currentPosition = skeletonNode->getPosition();
                       float distance = state.destination.distance(currentPosition);
-                      
+
                       if (distance <= 10.0f)
                       {
-                        moveSpeed /= 2;    
+                          moveSpeed /= 2;
                       }
                       if (distance <= 1.0f)
                       {
@@ -49,7 +57,8 @@ void Character::update(float delta)
 
                       cocos2d::Vec2 orig(1, 0);
                       orig.normalize();
-                      float cos = ((direction.x * orig.x) + (direction.y * orig.y)) / (direction.length() * orig.length());
+                      float cos = ((direction.x * orig.x) + (direction.y * orig.y)) / (direction.length() * orig.
+                          length());
 
                       if (cos >= 0)
                       {
@@ -69,7 +78,18 @@ void Character::update(float delta)
 
                   [&](Attack& state) -> State
                   {
-                      return State{Idle{}};
+                      auto animationName = skeletonNode->getState()->tracks[0]->animation->name;
+                      if (strcmp(animationName, "attack"))
+                      {
+                          auto animation = skeletonNode->setAnimation(0, "attack", false);
+                          animation->listener = &animListener;
+                      }
+                      else if (strcmp(animationName, "attack") == 0 && skeletonNode->getState()->tracks[0]->animationStart == -1)
+                      {
+                          return State{Idle{}};
+                      }
+                      
+                      return State{Attack{}};
                   }
     );
 }
@@ -108,6 +128,7 @@ void Character::checkActionQueue()
 
         if (action)
         {
+            moveSpeed = initMoveSpeed;
             if (action->actionDescription == CharacterActionDescription::Idle)
             {
                 state = State{Idle{}};
@@ -115,7 +136,6 @@ void Character::checkActionQueue()
             if (action->actionDescription == CharacterActionDescription::Walk)
             {
                 auto walkAction = static_cast<Walk*>(action);
-                moveSpeed = initMoveSpeed;
                 state = State{Walk{walkAction->time, walkAction->destination}};
             }
             if (action->actionDescription == CharacterActionDescription::Attack)
